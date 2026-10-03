@@ -82,7 +82,7 @@ class CognitiveLLMGateway:
                     {"role": "user", "content": user_content}
                 ],
                 temperature=0.0,
-                max_tokens=150,
+                max_tokens=350,
                 response_format={"type": "json_object"}
             )
             raw_text = response.choices[0].message.content.strip()
