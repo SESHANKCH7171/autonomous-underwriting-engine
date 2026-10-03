@@ -40,8 +40,8 @@ flowchart TD
         Logfire["Pydantic Logfire<br/>(Distributed Span Traces & Audit Logs)"]
     end
 
-    POS -->|POST /v1/underwrite/transaction| FastAPI
-    ERP -->|POST /v1/underwrite/transaction| FastAPI
+    POS -->|"POST /v1/underwrite/transaction"| FastAPI
+    ERP -->|"POST /v1/underwrite/transaction"| FastAPI
     
     FastAPI --> Sanitizer
     Sanitizer --> IngestNode
@@ -50,12 +50,12 @@ flowchart TD
     RulesNode <--> Redis
     RulesNode --> Router
     
-    Router -->|90% Clean Pass / Hard Rejection<br/>(Sub-15ms Fast Path)| SynthesisNode
-    Router -->|10% Ambiguous Edge Cases| CognitiveNode
+    Router -->|"Fast Path: 90% Clean Pass / Fatal Reject (Sub-15ms)"| SynthesisNode
+    Router -->|"Cognitive Path: 10% Ambiguous Edge Cases"| CognitiveNode
     
     CognitiveNode --> SynthesisNode
     SynthesisNode --> Logfire
-    SynthesisNode -->|UnderwritingDecision &lt; 180ms| FastAPI
+    SynthesisNode -->|"UnderwritingDecision (Sub-180ms SLA)"| FastAPI
 ```
 
 ---
