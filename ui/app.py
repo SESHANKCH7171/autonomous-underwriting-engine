@@ -159,7 +159,8 @@ with col_left:
     payload_str = st.text_area(
         "Edit or inspect invoice payload:",
         value=json.dumps(test_payload, indent=2),
-        height=520
+        height=520,
+        key=f"payload_area_{scenario}"
     )
     
     evaluate_clicked = st.button("🚀 Evaluate Underwriting Decision", type="primary", use_container_width=True)
