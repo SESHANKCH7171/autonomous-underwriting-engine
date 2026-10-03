@@ -7,6 +7,7 @@ Nodes:
 4. node_synthesize_decision: Creates final UnderwritingDecision contract with latency and audit logs.
 """
 
+import asyncio
 import time
 import uuid
 from typing import Any, Dict
@@ -142,30 +143,35 @@ async def node_cognitive_adjudication(state: UnderwritingState) -> Dict[str, Any
     trail = list(state.get("audit_trail", []))
     lines_summary = "; ".join([f"{item.description} ({item.total_item_amount_aed} AED)" for item in payload.financial_line_items])
 
-    # 1. System 1 Evaluation via TypeSafe Jev (Mesh API)
-    jev_result = await jev_gateway.evaluate_expense_legitimacy(
-        vendor_name=payload.supplier_details.legal_entity_name,
-        line_item_summary=lines_summary,
-        amount_aed=payload.totals_summary.grand_total_inclusive_vat_aed
+    context_notes = (
+        f"Deterministic risk score: {state.get('risk_score', 0)}. "
+        f"Cost center: {payload.customer_details.cost_center}. "
+        f"Department: {payload.customer_details.department}."
     )
+
+    # Concurrently execute System 1 (TypeSafe Jev) and System 2 (Groq LLM)
+    jev_task = asyncio.create_task(
+        jev_gateway.evaluate_expense_legitimacy(
+            vendor_name=payload.supplier_details.legal_entity_name,
+            line_item_summary=lines_summary,
+            amount_aed=payload.totals_summary.grand_total_inclusive_vat_aed
+        )
+    )
+    llm_task = asyncio.create_task(
+        llm_gateway.adjudicate_expense(
+            vendor_name=payload.supplier_details.legal_entity_name,
+            line_items_summary=lines_summary,
+            department=payload.customer_details.department,
+            amount_aed=payload.totals_summary.grand_total_inclusive_vat_aed,
+            context_notes=context_notes
+        )
+    )
+
+    jev_result, adjudication = await asyncio.gather(jev_task, llm_task)
+
     jev_choice = jev_result.get("choice", "OPEX_APPROVED")
     jev_conf = jev_result.get("confidence", 0.9)
     trail.append(f"JEV_SYSTEM1: Semantic Classification='{jev_choice}' (Confidence: {int(jev_conf * 100)}%, Source: {jev_result.get('source')})")
-
-    context_notes = (
-        f"System 1 Jev result: {jev_choice} (confidence: {jev_conf}). "
-        f"Deterministic risk score: {state.get('risk_score', 0)}. "
-        f"Cost center: {payload.customer_details.cost_center}."
-    )
-    
-    # 2. System 2 Narrative Synthesis via LLM
-    adjudication = await llm_gateway.adjudicate_expense(
-        vendor_name=payload.supplier_details.legal_entity_name,
-        line_items_summary=lines_summary,
-        department=payload.customer_details.department,
-        amount_aed=payload.totals_summary.grand_total_inclusive_vat_aed,
-        context_notes=context_notes
-    )
 
     verdict_str = adjudication.get("adjudication_verdict", "APPROVE")
     reasoning = adjudication.get("reasoning", "")

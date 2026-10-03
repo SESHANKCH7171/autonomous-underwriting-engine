@@ -81,8 +81,8 @@ class CognitiveLLMGateway:
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": user_content}
                 ],
-                temperature=settings.GROQ_TEMPERATURE,
-                max_tokens=600,
+                temperature=0.0,
+                max_tokens=150,
                 response_format={"type": "json_object"}
             )
             raw_text = response.choices[0].message.content.strip()

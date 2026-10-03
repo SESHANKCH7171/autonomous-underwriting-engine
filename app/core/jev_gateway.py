@@ -23,6 +23,13 @@ class JevSystemOneGateway:
         self.base_url = settings.MESH_BASE_URL.rstrip("/")
         self.model = settings.JEV_MODEL
         self._is_enabled = bool(self.api_key and not self.api_key.startswith("your_"))
+        self._client: Optional[httpx.AsyncClient] = None
+
+    def _get_client(self) -> httpx.AsyncClient:
+        if self._client is None or self._client.is_closed:
+            limits = httpx.Limits(max_keepalive_connections=20, max_connections=50, keepalive_expiry=30.0)
+            self._client = httpx.AsyncClient(limits=limits, timeout=1.5)
+        return self._client
 
     async def evaluate_expense_legitimacy(
         self,
@@ -63,19 +70,19 @@ class JevSystemOneGateway:
         }
 
         try:
-            async with httpx.AsyncClient(timeout=timeout_seconds) as client:
-                resp = await client.post(f"{self.base_url}/evaluate", json=payload, headers=headers)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    answer = data.get("answers", {}).get("expense_legitimacy", {})
-                    return {
-                        "choice": answer.get("choice", "OPEX_APPROVED"),
-                        "confidence": answer.get("confidence", 0.9),
-                        "probabilities": answer.get("probabilities", {}),
-                        "source": "typesafe_jev"
-                    }
-                else:
-                    logger.warning(f"Jev evaluate returned status {resp.status_code}: {resp.text[:200]}")
+            client = self._get_client()
+            resp = await client.post(f"{self.base_url}/evaluate", json=payload, headers=headers, timeout=timeout_seconds)
+            if resp.status_code == 200:
+                data = resp.json()
+                answer = data.get("answers", {}).get("expense_legitimacy", {})
+                return {
+                    "choice": answer.get("choice", "OPEX_APPROVED"),
+                    "confidence": answer.get("confidence", 0.9),
+                    "probabilities": answer.get("probabilities", {}),
+                    "source": "typesafe_jev"
+                }
+            else:
+                logger.warning(f"Jev evaluate returned status {resp.status_code}: {resp.text[:200]}")
         except Exception as e:
             logger.warning(f"Jev evaluation timed out or failed: {e}. Gracefully continuing.")
 
