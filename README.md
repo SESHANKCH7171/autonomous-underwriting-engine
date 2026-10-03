@@ -47,7 +47,7 @@ flowchart TD
     Sanitizer --> IngestNode
     IngestNode --> RulesNode
     
-    RulesNode <--> Redis
+    RulesNode ---|"TTL Cache & Deduplication"| Redis
     RulesNode --> Router
     
     Router -->|"Fast Path: 90% Clean Pass / Fatal Reject (Sub-15ms)"| SynthesisNode
