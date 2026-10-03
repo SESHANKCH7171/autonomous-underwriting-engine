@@ -84,6 +84,16 @@ st.markdown("""
         font-weight: 700;
         text-align: center;
     }
+    [data-testid="stMetricValue"] {
+        font-size: 1.35rem !important;
+        white-space: nowrap;
+        overflow: visible !important;
+    }
+    [data-testid="stMetricDelta"] {
+        font-size: 0.78rem !important;
+        white-space: nowrap;
+        overflow: visible !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -169,9 +179,24 @@ with col_right:
         st.caption(f"**Executive Summary:** {decision.summary_reason}")
 
         # Metrics Row
-        m1, m2, m3, m4 = st.columns(4)
+        m1, m2, m3, m4 = st.columns([1.2, 1, 1, 1])
+        sla_threshold = 180.0
         with m1:
-            st.metric("Total Latency", f"{total_time_ms} ms", delta="< 180ms SLA")
+            if total_time_ms <= sla_threshold:
+                st.metric(
+                    "Total Latency",
+                    f"{total_time_ms} ms",
+                    delta=f"< {int(sla_threshold)}ms SLA (PASSED)",
+                    delta_color="normal"  # Green
+                )
+            else:
+                over_by = round(total_time_ms - sla_threshold, 1)
+                st.metric(
+                    "Total Latency",
+                    f"{total_time_ms} ms",
+                    delta=f"- BREACH: >180ms (+{over_by}ms)",
+                    delta_color="normal"  # Starts with '-' so Streamlit automatically renders RED
+                )
         with m2:
             st.metric("Risk Score", f"{decision.risk_score:.1f} / 100")
         with m3:
