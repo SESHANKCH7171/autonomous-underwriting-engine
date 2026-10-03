@@ -126,12 +126,16 @@ if st.sidebar.button("🧹 Reset Deduplication & Velocity Cache", use_container_
     from app.rules.anomaly_detector import _dedup_store
     _dedup_store.clear()
     st.sidebar.success("✅ Cache cleared! Ready for fresh testing.")
+st.sidebar.caption("ℹ️ *Note: Only click reset if you want to test from scratch. Testing duplicate fraud requires an active cache.*")
 
 # Mutate payload based on scenario
 test_payload = json.loads(json.dumps(default_payload))
 
 if "Duplicate" in scenario:
-    st.sidebar.warning("Will test duplicate detection with active fingerprint cache.")
+    from app.rules.anomaly_detector import _dedup_store, compute_fingerprint
+    _fp = compute_fingerprint(test_payload)
+    _dedup_store[_fp] = time.time()  # Pre-seed so evaluating immediately triggers duplicate fraud rejection
+    st.sidebar.error("🚨 Duplicate fingerprint primed in cache! Click Evaluate to verify instant rejection.")
 elif "Forged UAE TRN" in scenario:
     test_payload["supplier_details"]["trn"] = "999888777666555"  # Fails 100...3 FTA syntax
 elif "Exceeded Card Policy" in scenario:

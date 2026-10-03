@@ -107,10 +107,15 @@ def node_deterministic_rules(state: UnderwritingState) -> Dict[str, Any]:
     normalized_risk = min(100.0, round(score, 2))
 
     # 5. Routing Decision: Is cognitive adjudication required?
-    # Hard failures (duplicate or severe budget overage) short-circuit directly to reject!
+    # Hard failures (duplicate, illegal TRN syntax, or hard budget overage) short-circuit directly to reject!
     # Pristine transactions short-circuit directly to approve!
-    # Cognitive path is only invoked for ambiguous cases (e.g. high-value near boundary or unmapped OpEx)
-    is_hard_fail = anomaly.is_duplicate or (not budget.within_budget and budget.utilization_pct > 120.0)
+    # Cognitive path is only invoked for ambiguous accounting discrepancies (e.g. VAT math deviations)
+    is_hard_fail = (
+        anomaly.is_duplicate
+        or not compliance.supplier_trn_valid
+        or not compliance.customer_trn_valid
+        or not budget.within_budget
+    )
     is_clean_pass = (normalized_risk == 0.0) and budget.within_budget and compliance.vat_reconciled
 
     requires_cognitive = (not is_hard_fail) and (not is_clean_pass)
