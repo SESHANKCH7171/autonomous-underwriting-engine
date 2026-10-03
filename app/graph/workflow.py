@@ -113,6 +113,22 @@ async def evaluate_transaction(raw_payload: Dict[str, Any]) -> UnderwritingDecis
                 risk_score=decision.risk_score,
                 latency_ms=decision.latency_ms
             )
+
+            # Unit Economics & Cost Tracking
+            is_fast_path = not any("JEV_SYSTEM1" in step for step in decision.audit_trail)
+            engine_cost = 0.000000 if is_fast_path else 0.000040
+            gpt4_baseline = 0.009000
+            savings_usd = gpt4_baseline - engine_cost
+
+            logfire.info(
+                "transaction_unit_economics",
+                invoice=invoice_num,
+                execution_path="FAST_PATH" if is_fast_path else "COGNITIVE_PATH",
+                engine_cost_usd=engine_cost,
+                monolithic_llm_cost_usd=gpt4_baseline,
+                savings_usd=savings_usd,
+                savings_pct=round((savings_usd / gpt4_baseline) * 100.0, 2)
+            )
         except Exception:
             pass
         return decision

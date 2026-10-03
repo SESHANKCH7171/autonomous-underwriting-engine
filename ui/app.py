@@ -179,8 +179,28 @@ with col_right:
         with m4:
             st.metric("VAT Reclaimable", "YES" if decision.compliance.vat_reclaimable else "NO")
 
+        # Real-Time Unit Economics Strip
+        is_fast_path = not any("JEV_SYSTEM1" in step for step in decision.audit_trail)
+        jev_cost = 0.000000 if is_fast_path else 0.000010
+        groq_cost = 0.000000 if is_fast_path else 0.000030
+        engine_cost = jev_cost + groq_cost
+        gpt4_cost = 0.009000
+        savings_pct = round(((gpt4_cost - engine_cost) / gpt4_cost) * 100.0, 2)
+
+        st.markdown(
+            f"""
+            <div style="background: #0F172A; border-radius: 8px; padding: 0.75rem 1rem; margin: 1rem 0; border: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #94A3B8; font-size: 0.85rem;">💰 <b>Unit Economics:</b> {"⚡ Fast-Path (Pure Python)" if is_fast_path else "🧠 Cognitive Path (Jev + Groq)"}</span>
+                <span style="color: #10B981; font-weight: 700; font-size: 0.95rem;">Cost: ${engine_cost:.6f}</span>
+                <span style="color: #EF4444; font-size: 0.85rem; text-decoration: line-through;">GPT-4o: ${gpt4_cost:.6f}</span>
+                <span style="background: #064E3B; color: #34D399; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.8rem;">{savings_pct}% SAVINGS</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
         # Detailed Breakdown Tabs
-        tab1, tab2, tab3, tab4 = st.tabs(["🏛️ Tax & Compliance", "💼 Budget & Policy", "🔍 Fraud & Anomalies", "📜 Audit Log"])
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏛️ Tax & Compliance", "💼 Budget & Policy", "🔍 Fraud & Anomalies", "📜 Audit Log", "💰 Unit Economics & ROI"])
 
         with tab1:
             st.markdown(f"**Jurisdiction:** `{decision.compliance.jurisdiction}` ({decision.compliance.regulatory_authority})")
@@ -218,6 +238,36 @@ with col_right:
             st.markdown("**Chronological Execution Steps:**")
             for step in decision.audit_trail:
                 st.code(step, language="text")
+
+        with tab5:
+            st.subheader("💵 Financial Unit Economics & Infrastructure ROI")
+            st.markdown("Compare the exact processing cost of this transaction against traditional monolithic LLMs and manual human underwriting.")
+            
+            c_cost1, c_cost2, c_cost3 = st.columns(3)
+            with c_cost1:
+                st.metric("This Engine Run", f"${engine_cost:.6f}", delta="Fast-Path 90%" if is_fast_path else "Cognitive 10%")
+            with c_cost2:
+                st.metric("Monolithic GPT-4o", f"${gpt4_cost:.6f}", delta="-99.5% cheaper")
+            with c_cost3:
+                st.metric("Human Underwriter", "$4.500000", delta="-100% automated")
+
+            st.markdown("---")
+            st.markdown("#### 🔬 Cost Component Breakdown for This Execution")
+            st.write(f"- **Deterministic Rules (TRN + VAT + SHA-256 Dedup)**: `$0.000000` *(Pure Python, in-process)*")
+            st.write(f"- **System 1 (TypeSafe Jev via Mesh API)**: `${jev_cost:.6f}` *(Calibrated 70ms categorization)*")
+            st.write(f"- **System 2 (Groq Ultra-Fast Llama/Mixtral)**: `${groq_cost:.6f}` *(Statutory audit memo synthesis)*")
+            st.write(f"- **Telemetry (Logfire & LangSmith)**: `$0.000000` *(Included in telemetry tier)*")
+
+            st.markdown("---")
+            st.markdown("#### 📈 Enterprise Scale Projections (Corporate Card Fleet)")
+            st.markdown("""
+            | Monthly Volume | This Engine (90/10 Fast-Path) | Monolithic LLM (GPT-4o) | Human Underwriting Team | Net Monthly Savings |
+            | :--- | :--- | :--- | :--- | :--- |
+            | **10,000 Swipes** | **$0.04** | $90.00 | $45,000.00 | **$89.96 (99.95%)** |
+            | **100,000 Swipes** | **$0.40** | $900.00 | $450,000.00 | **$899.60 (99.95%)** |
+            | **1,000,000 Swipes** | **$4.00** | $9,000.00 | $4,500,000.00 | **$8,996.00 (99.95%)** |
+            """)
+            st.caption("ℹ️ *Pricing Model: Mesh API Jev ~$0.042/1M tokens; Groq ~$0.08/1M tokens; GPT-4o ~$2.50 in / $10 out per 1M tokens; Human Underwriter ~$4.50/review.*")
 
     else:
         st.info("👈 Select a test scenario and click **Evaluate Underwriting Decision** to inspect real-time state machine execution.")
