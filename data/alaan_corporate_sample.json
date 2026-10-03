@@ -1,0 +1,85 @@
+{
+  "document_metadata": {
+    "document_type": "TAX_INVOICE",
+    "jurisdiction": "UAE",
+    "regulatory_authority": "Federal Tax Authority (FTA)",
+    "invoice_number": "CS/2023/1045",
+    "issue_date": "2023-10-12",
+    "supply_date": "2023-10-01",
+    "po_number": "PO-987654",
+    "qr_verification_status": "VERIFIED_FTA_COMPLIANT"
+  },
+  "supplier_details": {
+    "legal_entity_name": "CloudScale MENA FZ-LLC",
+    "trade_license_zone": "Dubai Internet City (DIC)",
+    "city": "Dubai",
+    "country": "United Arab Emirates",
+    "trn": "100458923100003",
+    "billing_contact": "billing@cloudscalemena.ae",
+    "phone": "+971 4 123 4567"
+  },
+  "customer_details": {
+    "billed_to": "Apex Enterprise Technologies LLC",
+    "corporate_account": "Alaan Corporate Spend Management",
+    "headquarters": "DIFC Gate Precinct 4, Level 5",
+    "city": "Dubai",
+    "country": "United Arab Emirates",
+    "trn": "100982347100003",
+    "cost_center": "CC-AI-INFRA-04",
+    "department": "Engineering & Core AI"
+  },
+  "corporate_card_payment": {
+    "payment_method": "Alaan Visa Corporate Platinum Card",
+    "card_last_four": "4192",
+    "cardholder_name": "Omar Farooq (Head of AI Engineering)",
+    "transaction_date": "2023-10-14",
+    "payment_status": "PAID_SETTLED",
+    "policy_limit_aed": 100000.0,
+    "policy_check": "AUTO_APPROVED_WITHIN_BUDGET"
+  },
+  "financial_line_items": [
+    {
+      "item_id": 1,
+      "description": "Enterprise Cloud GPU Cluster (H100 Sovereign Compute Pod - High Throughput)",
+      "quantity": 1,
+      "unit_price_aed": 45000.0,
+      "vat_rate_percentage": 5.0,
+      "vat_amount_aed": 2250.0,
+      "total_item_amount_aed": 47250.0
+    },
+    {
+      "item_id": 2,
+      "description": "High-Throughput API Gateway & Streaming Inference Proxy (Sub-200ms P99 SLA)",
+      "quantity": 1,
+      "unit_price_aed": 9000.0,
+      "vat_rate_percentage": 5.0,
+      "vat_amount_aed": 450.0,
+      "total_item_amount_aed": 9450.0
+    },
+    {
+      "item_id": 3,
+      "description": "Sovereign Security Monitoring & Audit Compliance Gateway (SAMA / DFSA Layer)",
+      "quantity": 1,
+      "unit_price_aed": 4000.0,
+      "vat_rate_percentage": 5.0,
+      "vat_amount_aed": 200.0,
+      "total_item_amount_aed": 4200.0
+    }
+  ],
+  "totals_summary": {
+    "subtotal_exclusive_vat_aed": 58000.0,
+    "vat_rate_standard": 0.05,
+    "total_vat_amount_aed": 2900.0,
+    "grand_total_inclusive_vat_aed": 60900.0,
+    "currency": "AED",
+    "fx_fixed_usd_peg": 3.6725,
+    "grand_total_equivalent_usd": 16582.71
+  },
+  "underwriting_risk_signals": {
+    "is_recurring_expense": true,
+    "supplier_verified_trn": true,
+    "vat_reclaimable": true,
+    "cash_flow_impact": "Operational Cloud Infrastructure (OpEx)",
+    "suspicious_patterns_detected": false
+  }
+}
