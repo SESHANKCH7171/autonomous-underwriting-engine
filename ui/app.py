@@ -132,15 +132,23 @@ st.sidebar.caption("ℹ️ *Note: Only click reset if you want to test from scra
 test_payload = json.loads(json.dumps(default_payload))
 
 if "Duplicate" in scenario:
-    from app.rules.anomaly_detector import _dedup_store, compute_fingerprint
-    _fp = compute_fingerprint(test_payload)
-    _dedup_store[_fp] = time.time()  # Pre-seed so evaluating immediately triggers duplicate fraud rejection
+    from app.rules.anomaly_detector import _dedup_store, generate_transaction_fingerprint
+    from app.schemas.input_payload import CorporateTransactionPayload
+    try:
+        p_obj = CorporateTransactionPayload(**test_payload)
+        _fp = generate_transaction_fingerprint(p_obj)
+        _dedup_store._store[_fp] = time.time() + 86400.0  # Pre-seed so evaluation catches it as duplicate!
+    except Exception:
+        pass
     st.sidebar.error("🚨 Duplicate fingerprint primed in cache! Click Evaluate to verify instant rejection.")
 elif "Forged UAE TRN" in scenario:
+    test_payload["document_metadata"]["invoice_number"] = "INV-2023-AML-4491"
     test_payload["supplier_details"]["trn"] = "999888777666555"  # Fails 100...3 FTA syntax
 elif "Exceeded Card Policy" in scenario:
+    test_payload["document_metadata"]["invoice_number"] = "INV-2023-CAP-7712"
     test_payload["totals_summary"]["grand_total_inclusive_vat_aed"] = 145000.0  # Limit is 100,000 AED
 elif "VAT Calculation Discrepancy" in scenario:
+    test_payload["document_metadata"]["invoice_number"] = "INV-2023-VAT-9021"
     test_payload["totals_summary"]["total_vat_amount_aed"] = 999.0  # Should be 2900.0 AED
 
 # Layout Columns
