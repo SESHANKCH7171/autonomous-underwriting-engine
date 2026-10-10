@@ -3,8 +3,11 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+# pyrefly: ignore [missing-import]
 from app.api.routes import router as underwriting_router
+# pyrefly: ignore [missing-import]
 from app.core.config import settings
+# pyrefly: ignore [missing-import]
 from app.telemetry.logfire_setup import configure_logfire
 
 

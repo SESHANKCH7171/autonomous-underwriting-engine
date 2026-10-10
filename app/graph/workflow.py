@@ -24,14 +24,18 @@ Architecture:
 """
 
 from typing import Any, Dict, Literal
+# pyrefly: ignore [missing-import]
 from langgraph.graph import StateGraph, START, END
+# pyrefly: ignore [missing-import]
 from app.graph.state import UnderwritingState
+# pyrefly: ignore [missing-import]
 from app.graph.nodes import (
     node_ingest_and_parse,
     node_deterministic_rules,
     node_cognitive_adjudication,
     node_synthesize_decision,
 )
+# pyrefly: ignore [missing-import]
 from app.schemas.decision_output import UnderwritingDecision
 
 
@@ -83,6 +87,7 @@ underwriting_graph = create_underwriting_graph()
 
 async def evaluate_transaction(raw_payload: Dict[str, Any]) -> UnderwritingDecision:
     """Convenience async entry point to run a payload through the LangGraph engine."""
+    # pyrefly: ignore [missing-import]
     from app.telemetry.logfire_setup import configure_logfire
     configure_logfire()
     

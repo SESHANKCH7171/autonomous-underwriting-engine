@@ -11,6 +11,7 @@ import json
 import logging
 from typing import Any, Dict, Optional
 from groq import AsyncGroq
+# pyrefly: ignore [missing-import]
 from app.core.config import settings
 
 logger = logging.getLogger("underwriting.llm_gateway")

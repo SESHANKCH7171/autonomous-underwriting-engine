@@ -10,6 +10,7 @@ Bridges raw unstructured invoice text to strict typed enums without burning LLM 
 import logging
 from typing import Any, Dict, Optional
 import httpx
+# pyrefly: ignore [missing-import]
 from app.core.config import settings
 
 logger = logging.getLogger("underwriting.jev_gateway")
